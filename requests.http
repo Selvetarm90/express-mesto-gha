@@ -1,0 +1,10 @@
+GET http://localhost:3000/cards
+
+###
+
+PATCH  http://localhost:3000/users/me/avatar
+content-Type: application/json
+
+ {
+    "avatar": "http://nevajno3311.ru"
+  }
