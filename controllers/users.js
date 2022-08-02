@@ -1,24 +1,24 @@
-const User = require("../models/user");
-const {
-  sendErrorIncorrectCreateProfile,
-  sendErrorIncorrectUpdateProfile,
-  sendErrorIncorrectUpdateAvatar,
-  sendErrorProfileNotFound,
-  sendErrorDefault,
-} = require("../utils/utils");
+const User = require('../models/user');
+const { sendError } = require('../utils/utils');
+
+const { BAD_REQUEST, NOT_FOUND } = require('../utils/constants');
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((data) => {
-      res.send({ data: data });
+      res.send({ data });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        sendErrorIncorrectCreateProfile(res);
+      if (err.name === 'ValidationError') {
+        sendError(
+          res,
+          BAD_REQUEST,
+          'Переданы некорректные данные',
+        );
         return;
       }
-      sendErrorDefault(res);
+      sendError(res);
     });
 };
 
@@ -28,19 +28,25 @@ module.exports.getUsers = (req, res) => {
       res.send({ data: users });
     })
     .catch(() => {
-      sendErrorDefault(res);
+      sendError(res);
     });
 };
 
 module.exports.qetUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === "CastError") {
-        sendErrorProfileNotFound(res);
+    .then((user) => {
+      if (!user) {
+        sendError(res, NOT_FOUND, 'Пользователь по указанному ID не найден.');
         return;
       }
-      sendErrorDefault(res);
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        sendError(res, NOT_FOUND, 'Некорректный ID.');
+        return;
+      }
+      sendError(res);
     });
 };
 
@@ -52,21 +58,25 @@ module.exports.updateProfile = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
-    .then((newUser) => {
-      res.send({ data: newUser });
+    .then((user) => {
+      if (!user) {
+        sendError(res, NOT_FOUND, 'Пользователь по указанному ID не найден.');
+        return;
+      }
+      res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        sendErrorIncorrectUpdateProfile(res);
+      if (err.name === 'ValidationError') {
+        sendError(res, BAD_REQUEST, 'Переданы некорректные данные');
         return;
       }
-      if (err.name === "CastError") {
-        sendErrorProfileNotFound(res);
+      if (err.name === 'CastError') {
+        sendError(res, NOT_FOUND, 'Некорректный ID.');
         return;
       }
-      sendErrorDefault(res);
+      sendError(res);
     });
 };
 
@@ -78,20 +88,24 @@ module.exports.updateAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
-    .then((newUser) => {
-      res.send({ data: newUser });
+    .then((user) => {
+      if (!user) {
+        sendError(res, NOT_FOUND, 'Пользователь по указанному ID не найден.');
+        return;
+      }
+      res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        sendErrorIncorrectUpdateAvatar(res);
+      if (err.name === 'ValidationError') {
+        sendError(res, BAD_REQUEST, 'Переданы некорректные данные');
         return;
       }
-      if (err.name === "CastError") {
-        sendErrorProfileNotFound(res);
+      if (err.name === 'CastError') {
+        sendError(res, NOT_FOUND, 'Некорректный ID.');
         return;
       }
-      sendErrorDefault(res);
+      sendError(res);
     });
 };
