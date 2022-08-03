@@ -1,7 +1,7 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const { userRouter } = require("./routes/users");
-const { cardRouter } = require("./routes/cards");
+const express = require('express');
+const mongoose = require('mongoose');
+const { userRouter } = require('./routes/users');
+const { cardRouter } = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -15,19 +15,19 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "62e398774d0d13d6ff541a0c",
+    _id: '62e398774d0d13d6ff541a0c',
   };
 
   next();
 });
 
 const main = async () => {
-  await mongoose.connect("mongodb://localhost:27017/mestodb", {
+  await mongoose.connect('mongodb://localhost:27017/mestodb', {
     useNewUrlParser: true,
     // useCreateIndex: true,
-    //  useFindAndModify: false
+    // useFindAndModify: false
   });
-  console.log("db connect");
+  console.log('db connect');
 };
 
 main().catch((err) => {
