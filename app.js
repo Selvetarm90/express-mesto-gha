@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { userRouter } = require('./routes/users');
 const { cardRouter } = require('./routes/cards');
+const auth = require('./middlewares/auth');
+const { INTERNAL_SERVER_ERROR } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -13,19 +15,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62e398774d0d13d6ff541a0c',
-  };
-
-  next();
-});
-
 const main = async () => {
   await mongoose.connect('mongodb://localhost:27017/mestodb', {
     useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useFindAndModify: false
   });
   console.log('db connect');
 };
@@ -35,7 +27,21 @@ main().catch((err) => {
 });
 
 app.use(userRouter);
+app.use(auth);
 app.use(cardRouter);
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === INTERNAL_SERVER_ERROR
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`app listening on PORT ${PORT}`);

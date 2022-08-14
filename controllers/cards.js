@@ -1,9 +1,9 @@
 const Card = require('../models/card');
-const { sendError } = require('../utils/utils');
+const BadRequetError = require('../errors/bad-request-error');
+const NotFound = require('../errors/not-found');
+const Forbidden = require('../errors/forbidden');
 
-const { BAD_REQUEST, NOT_FOUND } = require('../utils/constants');
-
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const { _id } = req.user;
   Card.create({ name, link, owner: _id })
@@ -12,42 +12,46 @@ module.exports.createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        sendError(res, BAD_REQUEST, 'Переданы некорректные данные');
+        next(new BadRequetError('Некорректные данные'));
         return;
       }
-      sendError(res);
+      next(err);
     });
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((data) => {
       res.send({ data });
     })
-    .catch(() => {
-      sendError(res);
+    .catch((err) => {
+      next(err);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        sendError(res, NOT_FOUND, 'Карточка по указанному ID не найдена');
-        return;
+        throw new NotFound('Карточка по указанному ID не найдена');
       }
+      // eslint-disable-next-line eqeqeq
+      if (req.user._id != card.owner) {
+        throw new Forbidden('Невозможно удалить чужую карочку');
+      }
+      card.remove();
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        sendError(res, NOT_FOUND, 'Некорректный ID');
+        next(new BadRequetError('Некорректный ID'));
         return;
       }
-      sendError(res);
+      next(err);
     });
 };
 
-module.exports.addLikeCard = (req, res) => {
+module.exports.addLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -55,21 +59,20 @@ module.exports.addLikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        sendError(res, NOT_FOUND, 'Карточка по указанному ID не найдена');
-        return;
+        throw new NotFound('Карточка по указанному ID не найдена');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        sendError(res, NOT_FOUND, 'Некорректный ID');
+        next(new BadRequetError('Некорректный ID'));
         return;
       }
-      sendError(res);
+      next(err);
     });
 };
 
-module.exports.deleteLikeCard = (req, res) => {
+module.exports.deleteLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -77,16 +80,15 @@ module.exports.deleteLikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        sendError(res, NOT_FOUND, 'Карточка по указанному ID не найдена');
-        return;
+        throw new NotFound('Карточка по указанному ID не найдена');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        sendError(res, NOT_FOUND, 'Некорректный ID');
+        next(new BadRequetError('Некорректный ID'));
         return;
       }
-      sendError(res);
+      next(err);
     });
 };
