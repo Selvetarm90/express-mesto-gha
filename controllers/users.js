@@ -17,9 +17,6 @@ module.exports.createUser = (req, res, next) => {
     email,
     password,
   } = req.body;
-  if (!email || !password) {
-    throw new BadRequetError('Некорректные данные');
-  }
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({
@@ -144,9 +141,6 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    throw new BadRequetError('Некорректные данные');
-  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });

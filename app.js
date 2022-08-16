@@ -4,7 +4,8 @@ const { errors } = require('celebrate');
 const { userRouter } = require('./routes/users');
 const { cardRouter } = require('./routes/cards');
 const auth = require('./middlewares/auth');
-const { INTERNAL_SERVER_ERROR } = require('./utils/constants');
+const NotFound = require('./errors/not-found');
+const { handleError } = require('./utils/handleError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -30,21 +31,13 @@ main().catch((err) => {
 app.use(userRouter);
 app.use(auth);
 app.use(cardRouter);
+app.use((req, res, next) => {
+  next(new NotFound('Маршрут не найден'));
+});
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === INTERNAL_SERVER_ERROR
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.use(handleError);
 
 app.listen(PORT, () => {
   console.log(`app listening on PORT ${PORT}`);

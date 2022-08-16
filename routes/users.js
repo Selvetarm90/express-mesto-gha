@@ -11,13 +11,14 @@ const {
   updateAvatar,
   login,
 } = require('../controllers/users');
+const { regExpUrl, regExpId } = require('../utils/constants');
 
 userRouter.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(3).max(30),
     about: Joi.string().min(3).max(30),
     avatar: Joi.string()
-      .pattern(/^((https|http):\/\/)(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/),
+      .pattern(regExpUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -32,7 +33,7 @@ userRouter.get('/users', auth, getUsers);
 userRouter.get('/users/me', auth, getUser);
 userRouter.get('/users/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/),
+    userId: Joi.string().pattern(regExpId),
   }),
 }), auth, qetUserById);
 userRouter.patch('/users/me', celebrate({
@@ -44,7 +45,7 @@ userRouter.patch('/users/me', celebrate({
 userRouter.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string()
-      .pattern(/^((https|http):\/\/)(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/),
+      .pattern(regExpUrl),
   }),
 }), auth, updateAvatar);
 
