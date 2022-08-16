@@ -15,8 +15,8 @@ const { regExpUrl, regExpId } = require('../utils/constants');
 
 userRouter.post('/signup', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(3).max(30),
-    about: Joi.string().min(3).max(30),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
     avatar: Joi.string()
       .pattern(regExpUrl),
     email: Joi.string().required().email(),
@@ -38,8 +38,8 @@ userRouter.get('/users/:userId', celebrate({
 }), auth, qetUserById);
 userRouter.patch('/users/me', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(3).max(30),
-    about: Joi.string().min(3).max(30),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
   }),
 }), auth, updateProfile);
 userRouter.patch('/users/me/avatar', celebrate({

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { regExpUrl } = require('../utils/constants');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,7 +13,7 @@ const cardSchema = new mongoose.Schema({
     required: [true, 'Необходимо ввести ссылку на изображение'],
     validate: {
       validator(v) {
-        return /^((https|http):\/\/)(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/.test(v);
+        return regExpUrl.test(v);
       },
     },
   },

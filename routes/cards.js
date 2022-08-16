@@ -16,20 +16,22 @@ cardRouter.post('/cards', celebrate({
       .pattern(regExpUrl),
   }),
 }), createCard);
+
 cardRouter.get('/cards', getCards);
+
 cardRouter.delete('/cards/:cardId', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().pattern(regExpId),
   }),
 }), deleteCard);
-cardRouter.put('/cards/:cardId/likes', getCards);
-cardRouter.delete('/cards/:cardId', celebrate({
+
+cardRouter.put('/cards/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().pattern(regExpId),
   }),
 }), addLikeCard);
-cardRouter.delete('/cards/:cardId/likes', getCards);
-cardRouter.delete('/cards/:cardId', celebrate({
+
+cardRouter.delete('/cards/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().pattern(regExpId),
   }),
